@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магията на Дробите - 5. клас</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #0ea5e9;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-top: 20px;
+            border: 2px solid var(--border-color);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Comic Neue', cursive;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.5rem; }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1.1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        /* Avatar Selector */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .avatar-option {
+            background: #f9fafb;
+            border: 3px solid var(--border-color);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .avatar-option:hover {
+            transform: translateY(-3px);
+            border-color: var(--secondary);
+        }
+
+        .avatar-option.selected {
+            border-color: var(--primary);
+            background: #e0e7ff;
+            transform: scale(1.05);
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);
+        }
+        .btn-secondary:hover {
+            background: #0284c7;
+        }
+
+        /* Dashboard & Levels */
+        .user-info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media(min-width: 600px) {
+            .levels-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .level-card {
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+        }
+
+        .level-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+
+        .level-card.locked:hover {
+            transform: none;
+            border-color: var(--border-color);
+        }
+
+        /* Quiz Screen */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .timer-box {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .question-container {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary);
+        }
+
+        /* Fraction styling */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 4px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .numerator {
+            border-bottom: 2px solid var(--text-main);
+            padding-bottom: 2px;
+        }
+
+        .denominator {
+            padding-top: 2px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media(min-width: 600px) {
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .option-btn {
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-letter {
+            background: #e2e8f0;
+            color: var(--text-main);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #e0e7ff;
+        }
+
+        .option-btn.correct {
+            background: #d1fae5 !important;
+            border-color: var(--success) !important;
+            color: #065f46;
+        }
+
+        .option-btn.wrong {
+            background: #fee2e2 !important;
+            border-color: var(--danger) !important;
+            color: #991b1b;
+        }
+
+        /* Powerups */
+        .powerups-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .powerup-btn {
+            background: #fef3c7;
+            border: 2px solid var(--accent);
+            color: #b45309;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .powerup-btn:hover:not(:disabled) {
+            background: #fde68a;
+        }
+
+        .powerup-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Explanation box */
+        .explanation-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: none;
+            font-size: 1rem;
+            color: #166534;
+        }
+
+        /* Leaderboard */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .leaderboard-table th {
+            background: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- ЕКРАН 1: РЕГИСТРАЦИЯ -->
+        <div id="screen-login" class="screen active">
+            <h1>✨ Магията на Дробите ✨</h1>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">Влез в света на петокласните магьосници и овладей дробите!</p>
+            
+            <div class="form-group">
+                <label for="username">Твоето име или псевдоним:</label>
+                <input type="text" id="username" placeholder="Напр. Магьосник Иван..." maxlength="20">
+            </div>
+
+            <div class="form-group">
+                <label>Избери си аватар:</label>
+                <div class="avatar-grid" id="avatar-grid">
+                    <div class="avatar-option selected" data-avatar="🧙‍♂️">🧙‍♂️</div>
+                    <div class="avatar-option" data-avatar="🧙‍♀️">🧙‍♀️</div>
+                    <div class="avatar-option" data-avatar="🔮">🔮</div>
+                    <div class="avatar-option" data-avatar="🐉">🐉</div>
+                </div>
+            </div>
+
+            <button class="btn" id="start-game-btn">Влез в играта!</button>
+        </div>
+
+        <!-- ЕКРАН 2: ГЛАВНО МЕНЮ И НИВА -->
+        <div id="screen-menu" class="screen">
+            <div class="user-info-bar">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="display-avatar" style="font-size: 2rem;">🧙‍♂️</span>
+                    <div>
+                        <h3 id="display-name" style="margin: 0; text-align: left;">Име</h3>
+                        <span id="display-title" style="font-size: 0.9rem; color: var(--primary); font-weight: bold;">Чирак на дробите</span>
+                    </div>
+                </div>
+                <div>
+                    <span style="font-weight: bold; color: var(--accent);">⭐ <span id="display-score">0</span> т.</span>
+                </div>
+            </div>
+
+            <h2>Избери магическо ниво</h2>
+            <div class="levels-grid">
+                <div class="level-card" onclick="startLevel(1)">
+                    <h3>Ниво 1</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Правилни и неправилни дроби</p>
+                    <span style="display: inline-block; margin-top: 10px; font-size: 0.85rem; font-weight: bold; color: var(--success);" id="lvl1-status">Отключено</span>
+                </div>
+                <div class="level-card locked" id="card-lvl2" onclick="startLevel(2)">
+                    <h3>Ниво 2</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Разширяване и съкращаване</p>
+                    <span style="display: inline-block; margin-top: 10px; font-size: 0.85rem; font-weight: bold; color: var(--danger);" id="lvl2-status">Заключено 🔒</span>
+                </div>
+                <div class="level-card locked" id="card-lvl3" onclick="startLevel(3)">
+                    <h3>Ниво 3</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">НОЗ и сравняване по числител</p>
+                    <span style="display: inline-block; margin-top: 10px; font-size: 0.85rem; font-weight: bold; color: var(--danger);" id="lvl3-status">Заключено 🔒</span>
+                </div>
+                <div class="level-card locked" id="card-lvl4" onclick="startLevel(4)">
+                    <h3>Ниво 4</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Магическа арена (Преговор)</p>
+                    <span style="display: inline-block; margin-top: 10px; font-size: 0.85rem; font-weight: bold; color: var(--danger);" id="lvl4-status">Заключено 🔒</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>🏆 Зала на славата (Класиране в реално време)</h3>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Място</th>
+                            <th>Магьосник</th>
+                            <th>Точки</th>
+                            <th>Титла</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr><td colspan="4" style="text-align: center;">Зареждане на класирането...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ЕКРАН 3: ИГРА / КВИЗ -->
+        <div id="screen-quiz" class="screen">
+            <div class="quiz-header">
+                <span id="quiz-level-title">Ниво 1</span>
+                <span id="quiz-progress">Въпрос 1 / 10</span>
+                <div class="timer-box">
+                    ⏱️ <span id="time-left">45</span>s
+                </div>
+            </div>
+
+            <div class="powerups-bar">
+                <button class="powerup-btn" id="powerup-time" onclick="useTimePowerup()">⏳ +10 сек (+10т.)</button>
+                <button class="powerup-btn" id="powerup-fifty" onclick="useFiftyPowerup()">⚡ 50/50 (-2 грешни)</button>
+            </div>
+
+            <div class="question-container" id="question-text">
+                Тук ще се появи въпросът...
+            </div>
+
+            <div class="options-grid" id="options-grid">
+                <!-- Опциите се зареждат динамично -->
+            </div>
+
+            <div class="explanation-box" id="explanation-box">
+                <strong>Обяснение:</strong> <span id="explanation-text"></span>
+            </div>
+
+            <button class="btn btn-secondary" id="next-question-btn" style="margin-top: 20px; display: none;" onclick="nextQuestion()">Следващ въпрос ➡️</button>
+        </div>
+
+        <!-- ЕКРАН 4: ЗАВЪРШЕНО НИВО -->
+        <div id="screen-result" class="screen" style="text-align: center;">
+            <h2>🎉 Нивото е завършено! 🎉</h2>
+            <p id="result-message" style="font-size: 1.2rem; margin: 20px 0; color: var(--text-muted);">Ти се справи отлично!</p>
+            <div style="font-size: 3rem; margin: 20px 0; font-weight: bold; color: var(--primary);" id="result-score-display">+0 точки</div>
+            <button class="btn" onclick="returnToMenu()">Към главното меню 🏰</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Imports (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBuOz9S4xd7qENBJ2oaCmvp49cSz4jCLAI",
+            authDomain: "magic-e9874.firebaseapp.com",
+            databaseURL: "https://magic-e9874-default-rtdb.firebaseio.com",
+            projectId: "magic-e9874",
+            storageBucket: "magic-e9874.firebasestorage.app",
+            messagingSenderId: "264808213414",
+            appId: "1:264808213414:web:ad2d8f60f23f5d9b5abd67",
+            measurementId: "G-GHPND6N6RS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // State variables
+        let currentUser = {
+            name: "",
+            avatar: "🧙‍♂️",
+            score: 0,
+            unlockedLevel: 1
+        };
+
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let scoreThisLevel = 0;
+        let timer = null;
+        let timeLeft = 45;
+        let powerupTimeUsed = false;
+        let powerupFiftyUsed = false;
+        let activeQuestions = [];
+
+        // Helper function to format fractions
+        function f(num, den) {
+            return `<span class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></span>`;
+        }
+
+        // Questions bank (10 questions per level)
+        const levelsData = {
+            1: {
+                title: "Ниво 1: Правилни и неправилни дроби",
+                time: 45,
+                questions: [
+                    {
+                        q: `Коя от следните дроби е правилна?`,
+                        options: [f(7, 5), f(3, 4), f(9, 4), f(12, 11)],
+                        correct: 1,
+                        explanation: `Правилна е тази дроб, чийто числител е по-малък от знаменателя. В дробта ${f(3, 4)} числителят 3 е по-малък от 4.`
+                    },
+                    {
+                        q: `Коя от следните дроби е неправилна?`,
+                        options: [f(2, 5), f(7, 9), f(11, 6), f(1, 3)],
+                        correct: 2,
+                        explanation: `Неправилна е дробта, чийто числител е по-голям или равен на знаменателя. Дробта ${f(11, 6)} има числител 11 > 6.`
+                    },
+                    {
+                        q: `Кое число е равенство за неправилната дроб ${f(13, 4)} (запис като неправилна дроб)?`,
+                        options: [`Числителят е по-малък от знаменателя`, `Числителят е равен на знаменателя`, `Числителят е по-голям от знаменателя`, `Няма правилен отговор`],
+                        correct: 2,
+                        explanation: `Неправилните дроби имат числител, по-голям от знаменателя.`
+                    },
+                    {
+                        q: `Коя от дробите има числител 7 и знаменател 12?`,
+                        options: [f(12, 7), f(7, 12), f(7, 7), f(12, 12)],
+                        correct: 1,
+                        explanation: `Числителят стои отгоре (7), а знаменателят отдолу (12). Получава се ${f(7, 12)}.`
+                    },
+                    {
+                        q: `Коя от следните дроби е по-голяма от 1?`,
+                        options: [f(4, 5), f(9, 10), f(15, 13), f(2, 3)],
+                        correct: 2,
+                        explanation: `Дробите, по-големи от 1, са неправилни (числителят е по-голям от знаменателя). Това е ${f(15, 13)}.`
+                    },
+                    {
+                        q: `Коя от следните дроби е по-малка от 1?`,
+                        options: [f(8, 7), f(11, 10), f(5, 9), f(12, 5)],
+                        correct: 2,
+                        explanation: `Дробите, по-малки от 1, са правилни. Това е ${f(5, 9)}.`
+                    },
+                    {
+                        q: `За коя дроб е вярно, че е равна на 1?`,
+                        options: [f(5, 6), f(7, 7), f(8, 9), f(3, 4)],
+                        correct: 1,
+                        explanation: `Когато числителят и знаменателят са равни, дробта е равна на 1 (${f(7, 7)} = 1).`
+                    },
+                    {
+                        q: `Коя от следните дроби е неправилна?`,
+                        options: [f(3, 8), f(4, 7), f(10, 3), f(1, 2)],
+                        correct: 2,
+                        explanation: `В дробта ${f(10, 3)} числителят (10) е по-голям от знаменателя (3).`
+                    },
+                    {
+                        q: `Коя от следните дроби е правилна?`,
+                        options: [f(15, 14), f(9, 8), f(6, 11), f(20, 19)],
+                        correct: 2,
+                        explanation: `Само в дробта ${f(6, 11)} числителят е по-малък от знаменателя.`
+                    },
+                    {
+                        q: `Кое твърдение за дробта ${f(5, 5)} е вярно?`,
+                        options: [`Тя е правилна и е равна на 1`, `Тя е неправилна и е равна на 1`, `Тя е по-малка от 1`, `Тя е по-голяма от 1`],
+                        correct: 1,
+                        explanation: `Дробите, чийто числител е равен на знаменателя, са неправилни по дефиниция и са равни на 1.`
+                    }
+                ]
+            },
+            2: {
+                title: "Ниво 2: Разширяване и съкращаване",
+                time: 55,
+                questions: [
+                    {
+                        q: `Ако разширим дробта ${f(2, 3)} с числото 4, каква дроб ще получим?`,
+                        options: [f(6, 7), f(8, 12), f(6, 12), f(8, 7)],
+                        correct: 1,
+                        explanation: `Умножаваме числителя и знаменателя с 4: 2.4 = 8 и 3.4 = 12. Получава се ${f(8, 12)}.`
+                    },
+                    {
+                        q: `Коя дроб се получава при съкращаване на ${f(12, 18)} с 6?`,
+                        options: [f(2, 3), f(3, 4), f(1, 2), f(2, 9)],
+                        correct: 0,
+                        explanation: `Делим числителя и знаменателя на 6: 12:6 = 2 и 18:6 = 3. Получава се ${f(2, 3)}.`
+                    },
+                    {
+                        q: `Коя от следните дроби е несъкратима?`,
+                        options: [f(4, 8), f(6, 9), f(5, 7), f(10, 15)],
+                        correct: 2,
+                        explanation: `Числата 5 и 7 нямат общи делители освен 1, затова ${f(5, 7)} е несъкратима.`
+                    },
+                    {
+                        q: `С колко е разширена дробта ${f(3, 5)}, за да се получи ${f(9, 15)}?`,
+                        options: [f(2, 2), f(3, 3), f(4, 4), f(5, 5)],
+                        correct: 1,
+                        explanation: `Числителят 3 е умножен по 3, за да стане 9, а знаменателят 5 по 3, за да стане 15. Разширена е с 3.`
+                    },
+                    {
+                        q: `Съкрати дробта ${f(15, 25)} до несъкратима дроб:`,
+                        options: [f(3, 5), f(5, 7), f(3, 4), f(1, 5)],
+                        correct: 0,
+                        explanation: `Делим числител и знаменател на общия им делител 5: 15:5 = 3 и 25:5 = 5 (${f(3, 5)}).`
+                    },
+                    {
+                        q: `Коя дроб е равна на ${f(1, 4)}?`,
+                        options: [f(2, 6), f(3, 12), f(4, 10), f(2, 5)],
+                        correct: 1,
+                        explanation: `Разширяваме ${f(1, 4)} с 3 и получаваме ${f(3, 12)}.`
+                    },
+                    {
+                        q: `Коя дроб се получава при съкращаване на ${f(16, 24)} на 8?`,
+                        options: [f(4, 6), f(2, 3), f(1, 3), f(2, 5)],
+                        correct: 1,
+                        explanation: `16:8 = 2 и 24:8 = 3. Получава се ${f(2, 3)}.`
+                    },
+                    {
+                        q: `На коя дроб е равна ${f(8, 10)}, след като я съкратим на 2?`,
+                        options: [f(4, 5), f(3, 5), f(4, 6), f(5, 6)],
+                        correct: 0,
+                        explanation: `8:2 = 4 и 10:2 = 5, получава се ${f(4, 5)}.`
+                    },
+                    {
+                        q: `Кое число е допълнителният множител при привеждане на ${f(2, 3)} към знаменател 12?`,
+                        options: [f(3, 3), f(4, 4), f(6, 6), f(2, 2)],
+                        current: 4,
+                        options: ["3", "4", "6", "2"],
+                        correct: 1,
+                        explanation: `12 : 3 = 4. Допълнителният множител е 4.`
+                    },
+                    {
+                        q: `Коя от дробите НЕ е равна на ${f(1, 2)}?`,
+                        options: [f(3, 6), f(5, 10), f(4, 8), f(2, 5)],
+                        correct: 3,
+                        explanation: `Дробта ${f(2, 5)} не може да се получи чрез разширяване на ${f(1, 2)}.`
+                    }
+                ]
+            },
+            3: {
+                title: "Ниво 3: НОЗ и сравняване по числител",
+                time: 70,
+                questions: [
+                    {
+                        q: `Кой е най-малкият общ знаменател (НОЗ) за дробите ${f(1, 4)} и ${f(1, 6)}?`,
+                        options: ["12", "24", "10", "8"],
+                        correct: 0,
+                        explanation: `Най-малкото общо кратно на 4 и 6 е 12. НОЗ е 12.`
+                    },
+                    {
+                        q: `Коя от следните дроби с еднакъв числител е по-голяма: ${f(3, 5)} или ${f(3, 7)}?`,
+                        options: [f(3, 5), f(3, 7), `Равни са`, `Не може да се определи`],
+                        correct: 0,
+                        explanation: `При еднакви числители по-голяма е тази дроб, която има по-малък знаменател (${f(3, 5)} > ${f(3, 7)}).`
+                    },
+                    {
+                        q: `Кой е най-малкият общ знаменател за дробите ${f(2, 3)} и ${f(1, 5)}?`,
+                        options: ["15", "8", "12", "30"],
+                        correct: 0,
+                        explanation: `НОК на знаменателите 3 и 5 е 15.`
+                    },
+                    {
+                        q: `Коя дроб е по-голяма според правилото за еднакви числители: ${f(5, 8)} или ${f(5, 12)}?`,
+                        options: [f(5, 12), f(5, 8), `Равни са`, `Няма правилен отговор`],
+                        correct: 1,
+                        explanation: `При еднакви числители (5), по-малкият знаменател (8) дава по-голяма дроб.`
+                    },
+                    {
+                        q: `Какъв е допълнителният множител за първата дроб при привеждане на ${f(1, 3)} и ${f(1, 4)} под общ знаменател?`,
+                        options: ["3", "4", "12", "1"],
+                        correct: 1,
+                        explanation: `НОЗ е 12. За първата дроб допълнителният множител е 12 : 3 = 4.`
+                    },
+                    {
+                        q: `Кой е най-малкият общ знаменател за дробите ${f(3, 10)} и ${f(1, 2)}?`,
+                        options: ["20", "10", "5", "12"],
+                        correct: 1,
+                        explanation: `Числото 10 се дели на 2, затова НОЗ е 10.`
+                    },
+                    {
+                        q: `Сравни дробите с еднакъв числител: ${f(7, 9)} [ ? ] ${f(7, 11)}`,
+                        options: [">", "<", "=", "Няма отговор"],
+                        correct: 0,
+                        explanation: `Тъй като 9 < 11, дробта с по-малък знаменател е по-голяма: ${f(7, 9)} > ${f(7, 11)}.`
+                    },
+                    {
+                        q: `При привеждане на ${f(2, 5)} и ${f(3, 10)} под общ знаменател, колко е НОЗ?`,
+                        options: ["50", "10", "5", "15"],
+                        correct: 1,
+                        explanation: `Тъй като 10 се дели на 5, НОЗ е 10.`
+                    },
+                    {
+                        q: `Коя дроб е по-малка: ${f(4, 15)} или ${f(4, 9)}?`,
+                        options: [f(4, 15), f(4, 9), `Равни са`, `Не може да се сравни`],
+                        correct: 0,
+                        explanation: `При еднакви числители по-малка е дробта с по-голям знаменател (${f(4, 15)}).`
+                    },
+                    {
+                        q: `Кой е НОЗ на дробите ${f(1, 2)}, ${f(1, 3)} и ${f(1, 6)}?`,
+                        options: ["12", "6", "18", "36"],
+                        correct: 1,
+                        explanation: `Най-малкото общо кратно на 2, 3 и 6 е 6.`
+                    }
+                ]
+            },
+            4: {
+                title: "Ниво 4: Магическа арена (Преговор)",
+                time: 75,
+                questions: [
+                    {
+                        q: `Коя от следните дроби е равна на ${f(3, 4)}?`,
+                        options: [f(6, 8), f(4, 5), f(5, 8), f(9, 16)],
+                        correct: 0,
+                        explanation: `Като разширим ${f(3, 4)} с 2, получаваме ${f(6, 8)}.`
+                    },
+                    {
+                        q: `Ако съкратим дробта ${f(18, 30)} на 6, каква дроб получаваме?`,
+                        options: [f(3, 5), f(2, 5), f(3, 10), f(6, 10)],
+                        correct: 0,
+                        explanation: `18 : 6 = 3 и 30 : 6 = 5. Получава се ${f(3, 5)}.`
+                    },
+                    {
+                        q: `Коя от следните дроби е неправилна?`,
+                        options: [f(5, 8), f(12, 11), f(3, 7), f(1, 9)],
+                        correct: 1,
+                        explanation: `Дробта ${f(12, 11)} има числител по-голям от знаменателя, затова е неправилна.`
+                    },
+                    {
+                        q: `Коя от дробите с еднакъв числител е по-голяма: ${f(2, 7)} или ${f(2, 5)}?`,
+                        options: [f(2, 7), f(2, 5), `Равни са`, `Няма отговор`],
+                        correct: 1,
+                        explanation: `При еднакви числители по-голяма е дробта с по-малък знаменател (${f(2, 5)}).`
+                    },
+                    {
+                        q: `Кой е НОЗ на дробите ${f(1, 4)} и ${f(3, 10)}?`,
+                        options: ["40", "20", "14", "10"],
+                        correct: 1,
+                        explanation: `НОК на 4 и 10 е 20.`
+                    },
+                    {
+                        q: `Коя дроб е несъкратима?`,
+                        options: [f(10, 20), f(9, 12), f(7, 11), f(6, 15)],
+                        correct: 2,
+                        explanation: `Числата 7 и 11 нямат общи делители.`
+                    },
+                    {
+                        q: `Ако ${f("x", 12)} = ${f(3, 4)}, колко е числото x?`,
+                        options: ["6", "9", "8", "12"],
+                        correct: 1,
+                        explanation: `Знаменателят 4 е умножен по 3, за да стане 12. Следователно числителят x = 3 . 3 = 9.`
+                    },
+                    {
+                        q: `Кое твърдение е вярно за дробта ${f(15, 15)}?`,
+                        options: [`Тя е правилна и е равна на 1`, `Тя е неправилна и е равна на 1`, `Тя е по-малка от 1`, `Тя е по-голяма от 1`],
+                        correct: 1,
+                        explanation: `Числителят е равен на знаменателя, затова дробта е неправилна и е равна на 1.`
+                    },
+                    {
+                        q: `С колко е разширена ${f(2, 7)}, за да се получи ${f(10, 35)}?`,
+                        options: ["с 3", "с 4", "с 5", "с 7"],
+                        correct: 2,
+                        explanation: `2 . 5 = 10 и 7 . 5 = 35. Разширена е с 5.`
+                    },
+                    {
+                        q: `Коя от следните дроби е най-малката по стойност?`,
+                        options: [f(5, 6), f(5, 7), f(5, 9), f(5, 8)],
+                        correct: 2,
+                        explanation: `При еднакви числители най-малка е дробта с най-голям знаменател (${f(5, 9)}).`
+                    }
+                ]
+            }
+        };
+
+        // Navigation between screens
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Avatar selection
+        document.querySelectorAll('.avatar-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                currentUser.avatar = opt.dataset.avatar;
+            });
+        });
+
+        // Start game button
+        document.getElementById('start-game-btn').addEventListener('click', () => {
+            const nameInput = document.getElementById('username').value.trim();
+            if (!nameInput) {
+                alert('Моля, въведи своето име или псевдоним!');
+                return;
+            }
+            currentUser.name = nameInput;
+            
+            // Load saved state if exists in localStorage
+            const saved = localStorage.getItem('magia_drobi_user_' + currentUser.name);
+            if (saved) {
+                const data = JSON.parse(saved);
+                currentUser.score = data.score || 0;
+                currentUser.unlockedLevel = data.unlockedLevel || 1;
+            }
+
+            updateMenuUI();
+            showScreen('screen-menu');
+        });
+
+        function updateMenuUI() {
+            document.getElementById('display-name').innerText = currentUser.name;
+            document.getElementById('display-avatar').innerText = currentUser.avatar;
+            document.getElementById('display-score').innerText = currentUser.score;
+
+            // Update title based on score
+            let title = "Чирак на дробите";
+            if (currentUser.score >= 400) title = "Върховен архимаг 👑";
+            else if (currentUser.score >= 250) title = "Магьосник на дробите 🔮";
+            else if (currentUser.score >= 100) title = "Асистент по знаменатели 📜";
+            document.getElementById('display-title').innerText = title;
+
+            // Unlock levels
+            for (let i = 2; i <= 4; i++) {
+                const card = document.getElementById(`card-lvl${i}`);
+                const status = document.getElementById(`lvl${i}-status`);
+                if (currentUser.unlockedLevel >= i) {
+                    card.classList.remove('locked');
+                    status.innerText = "Отключено ✅";
+                    status.style.color = "var(--success)";
+                } else {
+                    card.classList.add('locked');
+                    status.innerText = "Заключено 🔒";
+                    status.style.color = "var(--danger)";
+                }
+            }
+        }
+
+        // Start Level
+        window.startLevel = function(lvl) {
+            if (currentUser.unlockedLevel < lvl) {
+                alert('Това ниво е заключено! Завърши предходното ниво, за да го отключиш.');
+                return;
+            }
+            currentLevel = lvl;
+            currentQuestionIndex = 0;
+            scoreThisLevel = 0;
+            powerupTimeUsed = false;
+            powerupFiftyUsed = false;
+
+            document.getElementById('powerup-time').disabled = false;
+            document.getElementById('powerup-fifty').disabled = false;
+
+            activeQuestions = [...levelsData[lvl].questions];
+            // Shuffle questions if desired, or keep orderly
+            document.getElementById('quiz-level-title').innerText = levelsData[lvl].title;
+
+            showScreen('screen-quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= activeQuestions.length) {
+                endLevel();
+                return;
+            }
+
+            const qData = activeQuestions[currentQuestionIndex];
+            document.getElementById('quiz-progress').innerText = `Въпрос ${currentQuestionIndex + 1} / ${activeQuestions.length}`;
+            document.getElementById('question-text').innerHTML = qData.q;
+
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                const letters = ['A', 'B', 'C', 'D'];
+                btn.innerHTML = `<div class="option-letter">${letters[idx]}</div> <div>${opt}</div>`;
+                btn.onclick = () => selectAnswer(idx);
+                optionsGrid.appendChild(btn);
+            });
+
+            document.getElementById('explanation-box').style.display = 'none';
+            document.getElementById('next-question-btn').style.display = 'none';
+
+            // Reset timer
+            clearInterval(timer);
+            timeLeft = levelsData[currentLevel].time;
+            document.getElementById('time-left').innerText = timeLeft;
+
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time-left').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(selectedIndex) {
+            clearInterval(timer);
+            const qData = activeQuestions[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.option-btn');
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === qData.correct) {
+                    btn.classList.add('correct');
+                } else if (idx === selectedIndex) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            if (selectedIndex === qData.correct) {
+                scoreThisLevel += 10;
+            }
+
+            // Show explanation
+            document.getElementById('explanation-text').innerHTML = qData.explanation;
+            document.getElementById('explanation-box').style.display = 'block';
+            document.getElementById('next-question-btn').style.display = 'block';
+        }
+
+        function handleTimeout() {
+            const qData = activeQuestions[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === qData.correct) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            document.getElementById('explanation-text').innerHTML = "Времето изтече! " + qData.explanation;
+            document.getElementById('explanation-box').style.display = 'block';
+            document.getElementById('next-question-btn').style.display = 'block';
+        }
+
+        window.nextQuestion = function() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        // Powerups
+        window.useTimePowerup = function() {
+            if (powerupTimeUsed) return;
+            powerupTimeUsed = true;
+            document.getElementById('powerup-time').disabled = true;
+            timeLeft += 10;
+            document.getElementById('time-left').innerText = timeLeft;
+        }
+
+        window.useFiftyPowerup = function() {
+            if (powerupFiftyUsed) return;
+            powerupFiftyUsed = true;
+            document.getElementById('powerup-fifty').disabled = true;
+
+            const qData = activeQuestions[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.option-btn');
+            let removedCount = 0;
+
+            buttons.forEach((btn, idx) => {
+                if (idx !== qData.correct && removedCount < 2) {
+                    btn.style.opacity = '0.2';
+                    btn.disabled = true;
+                    removedCount++;
+                }
+            });
+        }
+
+        function endLevel() {
+            currentUser.score += scoreThisLevel;
+            
+            // Unlock next level if passed with good score
+            if (scoreThisLevel >= 50 && currentUser.unlockedLevel === currentLevel && currentLevel < 4) {
+                currentUser.unlockedLevel = currentLevel + 1;
+            }
+
+            // Save locally
+            localStorage.setItem('magia_drobi_user_' + currentUser.name, JSON.stringify({
+                score: currentUser.score,
+                unlockedLevel: currentUser.unlockedLevel
+            }));
+
+            // Save to Firebase Realtime Database
+            const scoreRef = push(ref(db, 'scores'));
+            set(scoreRef, {
+                name: currentUser.name,
+                avatar: currentUser.avatar,
+                score: currentUser.score,
+                levelReached: currentLevel,
+                timestamp: Date.now()
+            });
+
+            if (scoreThisLevel >= 70) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+
+            document.getElementById('result-message').innerText = `Ти спечели ${scoreThisLevel} точки в това ниво!`;
+            document.getElementById('result-score-display').innerText = `Общ резултат: ${currentUser.score} т.`;
+            showScreen('screen-result');
+        }
+
+        window.returnToMenu = function() {
+            updateMenuUI();
+            showScreen('screen-menu');
+        }
+
+        // Listen to Firebase Realtime Database for Leaderboard updates
+        onValue(ref(db, 'scores'), (snapshot) => {
+            const data = snapshot.val();
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            if (!data) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center;">Все още няма регистрирани резултати.</td></tr>`;
+                return;
+            }
+
+            // Convert to array and group by name (keep highest score)
+            let usersMap = {};
+            Object.values(data).forEach(item => {
+                if (!usersMap[item.name] || usersMap[item.name].score < item.score) {
+                    usersMap[item.name] = item;
+                }
+            });
+
+            let sortedUsers = Object.values(usersMap).sort((a, b) => b.score - a.score);
+
+            sortedUsers.slice(0, 10 маслом).forEach((user, index) => {
+                let title = "Чирак на дробите";
+                if (user.score >= 400) title = "Върховен архимаг 👑";
+                else if (user.score >= 250) title = "Магьосник на дробите 🔮";
+                else if (user.score >= 100) title = "Асистент по знаменатели 📜";
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><b>#${index + 1}</b></td>
+                    <td>${user.avatar} ${user.name}</td>
+                    <td><b>${user.score}</b> т.</td>
+                    <td>${title}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+
+    </script>
+</body>
+</html>
